@@ -38,7 +38,7 @@ if __name__ == "__main__":
     kappa2 = 0#kappa #*(-3) #0.5*(-1j) #無効
     theta2 = 0 # 0.1*np.pi
 
-    npr_sweep_delta = np.linspace(0, 2, 51)
+    npr_sweep_delta = np.linspace(0, 1, 51)
     npr_sweep_theta = np.linspace(0, 2, 41)*np.pi
     #npr_sweep_delta = np.linspace(1, 1, 1)
     #npr_sweep_theta = np.linspace(1, 1, 1)*np.pi*5/6
@@ -98,9 +98,9 @@ if __name__ == "__main__":
     # plot as a heatmap
     fig = plt.figure(figsize=(4, 4))
     ax = fig.add_subplot(111)
-    cax = ax.imshow(df_Vinf, interpolation='nearest', cmap=cm.viridis_r, vmin=0, vmax=0.3) #np.max(df_Vinf.values)
+    cax = ax.imshow(df_Vinf, interpolation='nearest', cmap=cm.viridis_r, vmin=0, vmax=0.1) #np.max(df_Vinf.values)
     divider = make_axes_locatable(ax)
-    cbar = fig.colorbar(cax, ticks=[0,0.3], shrink=0.6)
+    cbar = fig.colorbar(cax, ticks=[0,0.1   ], shrink=0.6)
     ax.set_xticks(
         np.linspace(0, npr_sweep_theta.shape[0]-1, 5), 
         ['0', r'$\pi/2$', r'$\pi$', r'$3\pi/2$', r'$2\pi$']
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     )
     ax.set_xlabel(r"$\theta$")
     ax.set_ylabel(r"$\delta$")
-    cbar.set_label(r"$\sigma_\infty$")
+    cbar.set_label(r"$V_\infty$")
     fig.tight_layout()
     fig.savefig(filepath_output + "Vinf.svg", transparent=True)
     plt.show()

@@ -29,10 +29,10 @@ class CoupledModeEquation:
         self.tmax = tmax
         self.Nt = int(self.tmax/self.dt)
         self.tlist = np.linspace(0, self.tmax, self.Nt)
-        self.psi = np.zeros((self.N, self.Nt), dtype=np.complex)
+        self.psi = np.zeros((self.N, self.Nt), dtype=complex)
 
         self.dict_results = {}
-        self.dict_labels = {"psiReal": "$\psi_r$", "psiImag": "$\psi_i$", "psiAbs": "$\|\psi\|$", "psiAbsRel": "$\|\psi\| / \|\psi_0\|$", "psiPhase": "$\phi$", "psiPhaseRel": "$\phi - \phi_0$"}
+        self.dict_labels = {"psiReal": "$r_i$", "psiImag": "$phi_i$", "psiAbs": "$r_i$", "psiAbsRel": "$r_i / r_0$", "psiPhase": "$\phi$", "psiPhaseRel": "$\phi_i - \phi_0$"}
 
     def set_initial_state(self, psi0):
         self.psi[:, 0] = psi0
@@ -57,7 +57,7 @@ class CoupledModeEquation:
         self.dict_results["psiPhaseRel"] = ((np.angle(self.psi) - np.angle(self.psi[0])) / np.pi - 1) % 2 - 1
 
 
-    def plot(self, key="psiReal", color="gray"):
+    def plot(self, key="psiReal", color="gray", list_ylim=[]):
         fig = plt.figure(figsize=(4, 3))
         ax = fig.add_subplot(111)
         
@@ -76,10 +76,12 @@ class CoupledModeEquation:
         ax.set_xlim(0, self.tmax)
         if key == "psiPhaseRel":
             ax.set_ylim(-1, 1)
+        if len(list_ylim) == 2:
+            ax.set_ylim(list_ylim)
 
         #ax.legend()
         plt.tight_layout()
-        plt.savefig(filepath_output + "cme_" + key + ".png", dpi=300)
+        plt.savefig(filepath_output + "cme_" + key + ".svg", transparent=True)
         plt.show()
         plt.close()
 
