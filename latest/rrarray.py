@@ -1,4 +1,4 @@
-
+#%%
 if True:
     import numpy as np
     import pandas as pd
@@ -19,7 +19,7 @@ if True:
 
 
 class RRarray:
-    def __init__(self, n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=False):
+    def __init__(self, n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=False, boundary="open"):
         """
         n: number of Ring Resonators
         omega: detuning of the ring resonators 
@@ -39,6 +39,7 @@ class RRarray:
             "theta":theta,
             "kappa2":kappa2, 
             "theta2":theta2,
+            "boundary":boundary,
             }
         self.savefig = savefig
         #self.n = n
@@ -67,13 +68,22 @@ class RRarray:
         self.theta = self.dict_vals["theta"]
         self.kappa2 = self.dict_vals["kappa2"]
         self.theta2 = self.dict_vals["theta2"]
+        self.boundary = self.dict_vals["boundary"]
 
         self.H = np.zeros((self.n, self.n))
         self.H = self.H.astype(complex)
 
+        arg = np.exp(1j * self.theta)
+
         # diagonal elements
-        self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * self.npr_eta[0] - 2j * self.kappa
-        self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * self.npr_eta[self.n-1] - 2j * self.kappa
+        if self.boundary=="open":
+            self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * self.npr_eta[0] - 2j * self.kappa
+            self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * self.npr_eta[self.n-1] - 2j * self.kappa
+        elif self.boundary=="periodic":
+            self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * self.npr_eta[0] - 4j * self.kappa
+            self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * self.npr_eta[self.n-1] - 4j * self.kappa
+            self.H[0, self.n-1] = (-2j) * self.kappa * arg
+            self.H[self.n-1, 0] = (-2j) * self.kappa * arg
         for i in range(1, self.n-1):
             self.H[i, i] = -self.omega + self.npr_delta[i] + 1j * self.npr_eta[i] - 4j * self.kappa 
 
@@ -81,7 +91,6 @@ class RRarray:
         H_od1 = np.diag(np.ones(self.n-1),1)
         H_od2 = np.diag(np.ones(self.n-1),1).T
 
-        arg = np.exp(1j * self.theta)
         H_od1 = H_od1 * (-2j) * self.kappa * arg
         H_od2 = H_od2 * (-2j) * self.kappa * arg
 
@@ -94,7 +103,8 @@ class RRarray:
         Hnnn_od2 = Hnnn_od2 * (-2j) * self.kappa2 * arg_nnn
 
         self.H += H_od1 + H_od2 + Hnnn_od1 + Hnnn_od2
-        #self.H = np.conjugate(self.H.T)
+
+
 
         self.H_inv = np.linalg.pinv(self.H)
 
@@ -295,8 +305,8 @@ class RRarray:
 
 if __name__ == "__main__":
     delta=0
-    npr_Delta = -np.array([-2,2,-1,0,1])
-    #npr_Delta = np.array([-2,-1,0,1,2])
+    #npr_Delta = np.array([-2,2,-1,0,1])
+    npr_Delta = np.array([-2,-1,0,1,2])
     #npr_Delta = np.array([-5,-1,0,1,5])
     #npr_Delta = -np.array([-6,0,3])
     #npr_Delta = np.zeros(5)
@@ -306,9 +316,10 @@ if __name__ == "__main__":
     #n = npr_Delta.shape[0]
     npr_eta = np.zeros(n)-0#.1
     kappa = 1#*(-1j) # dummy because of the sweep
-    theta = 0 # 0.1*np.pi
+    theta = np.pi
     kappa2 = 0#0.5*(-1j) #無効
     theta2 = 0 # 0.1*np.pi
+    boundary = "periodic"
 
     npr_kappa = np.linspace(0, 10, 200)
     #npr_kappa = np.linspace(0, 2, 200)
@@ -316,7 +327,7 @@ if __name__ == "__main__":
     npr_kappa2 = npr_kappa*0 + np.zeros(npr_kappa.shape[0])
     npr_sweep = np.array([npr_kappa,npr_kappa2]) # kappa と kappa2 を同時に変化させる
 
-    cls_rr = RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True)
+    cls_rr = RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary=boundary)
     cls_rr.sweep(npr_sweep, list_keys=["kappa","kappa2"])
     cls_rr.plot_eigval_sweep()
     cls_rr.show_eigvec(npr_kappa.shape[0] - 1)
