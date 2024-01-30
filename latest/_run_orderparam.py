@@ -24,12 +24,12 @@ if __name__ == "__main__":
     #npr_Delta = np.array([-1,-5,3,-1,5])
 
     #npr_Delta = np.array([-2,-1,0,1,2+1e-3])
-    npr_Delta = np.array([-2,-1,0,1,2])
+    #npr_Delta = np.array([-2,-1,0,1,2])
     #npr_Delta = np.array([-2,2,-1,0,1])
     #npr_Delta = np.array([-1,-1,-2,-1,0,1,2,1,1])
     
-    #np.random.seed(seed=12345678)
-    #npr_Delta = np.random.randn(15)
+    np.random.seed(seed=12345678)
+    npr_Delta = np.random.randn(15)
     
     #npr_Delta = np.zeros(5)
     #npr_Delta = np.zeros(10)
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     theta = np.pi #0.1*np.pi
     kappa2 = 0#kappa #*(-3) #0.5*(-1j) #無効
     theta2 = 0 # 0.1*np.pi
-    boundary = "periodic"
+    boundary = "periodic" #"open"#"periodic"
 
     npr_sweep_delta = np.linspace(0, 1, 51)
     npr_sweep_theta = np.linspace(0, 2, 41)*np.pi
