@@ -328,10 +328,10 @@ if __name__ == "__main__":
     theta2 = 0 # 0.1*np.pi
     boundary = "open" #"periodic"
 
-    npr_kappa = np.linspace(0, 10, 200)
-    #npr_kappa = np.linspace(0, 2, 200)
+    #npr_kappa = np.linspace(0, 10, 200)
+    npr_kappa = np.linspace(0, 2, 200)
     
-    npr_kappa2 = npr_kappa*0 + np.zeros(npr_kappa.shape[0])
+    npr_kappa2 = npr_kappa#*0 + np.zeros(npr_kappa.shape[0])
     npr_sweep = np.array([npr_kappa,npr_kappa2]) # kappa と kappa2 を同時に変化させる
 
     cls_rr = RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary=boundary)
