@@ -26,17 +26,17 @@ if __name__ == "__main__":
     n = npr_Delta.shape[0]
 
     npr_eta = np.array([1, 0., 0., 0., 1])*0.5
-    kappa = 3.5#0.35#10*(1j) # dummy because of the sweep
+    kappa = 2#5 #3.819095477386935 #3.5#0.35#10*(1j) # dummy because of the sweep
     theta = 0 # 0.1*np.pi
     kappa2 = 0#kappa #*(-3) #0.5*(-1j) #無効
     theta2 = 0 # 0.1*np.pi
-    npr_omega = np.linspace(-5,5,201)
+    npr_omega = np.linspace(-2,2,201)
 
     cls_rr = rrarray.RRarray(n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True)
     cls_rr.solve_flux(npr_omega)
     cls_rr.plot_flux()
 
-    xmax = 0.5
+    xmax = 2 #0.5
     xmin = -xmax
     p0 = [1, 0, 1, 3]
     cls_rr.fit_by_lorentzian(plottype="T",xmin=xmin,xmax=xmax,p0=p0)

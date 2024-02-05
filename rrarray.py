@@ -248,17 +248,20 @@ class RRarray:
         self.df_flux = pd.DataFrame({"freq":self.npr_freq.real, "R":self.npr_R, "T":self.npr_T})
         self.df_flux.to_csv(self.filepath_output + "flux.csv", index=False)
 
-    def plot_flux(self):
+    def plot_flux(self, plottype="T"):
         """
         plot the amplitude of the output port for each input frequency
         """
-        fig = plt.figure(figsize=(4,3))
+        fig = plt.figure(figsize=(3,3))
         ax = fig.add_subplot(111)
-        #ax.plot(self.npr_freq, self.npr_R, label="R", color="gray")
-        ax.plot(self.npr_freq, self.npr_T, label="T", color="teal")
+        if plottype=="T":
+            ax.plot(self.npr_freq, self.npr_T, label="T", color="teal")
+        elif plottype=="R":
+            ax.plot(self.npr_freq, self.npr_R, label="R", color="gray")
+
 
         ax.set_xlabel(r"$\omega$")
-        ax.set_ylabel("$R, T$")
+        ax.set_ylabel(plottype)
         ax.legend(fontsize=fs*0.6)
         #ax.set_ylim(0, 1)
         plt.tight_layout()
@@ -288,14 +291,16 @@ class RRarray:
         print("b: ", popt[1])
         print("c: ", popt[2])
         print("d: ", popt[-1])
+        d_lorentz = popt[-1]
 
         y_fit = func(x, *popt)
-        fig = plt.figure(figsize=(4,3))
+        fig = plt.figure(figsize=(3,3))
         ax = fig.add_subplot(111)
-        ax.plot(x, y, label="R", color="gray")
+        ax.plot(x, y, label=plottype, color="gray")
         ax.plot(x, y_fit, label="fit", color="teal", linestyle="dashed")
         ax.set_xlabel(r"$\omega$")
-        ax.set_ylabel("$R$")
+        ax.set_ylabel(plottype)
+        ax.text(0.5, 0.5, "$d$ = %.2f"%d_lorentz, transform=ax.transAxes, fontsize=fs*0.8)
         ax.legend(fontsize=fs*0.6)
         #ax.set_ylim(0, 1)
         plt.tight_layout()
@@ -314,12 +319,14 @@ if __name__ == "__main__":
 
     #npr_Delta = np.zeros(5)
     #n = npr_Delta.shape[0]
-    npr_eta = np.zeros(n)-0#.1
+    #npr_eta = np.zeros(n) #-0#.1
+    npr_eta = np.array([1, 0., 0., 0., 1])*0.5
+
     kappa = 1#*(-1j) # dummy because of the sweep
     theta = np.pi
     kappa2 = 0#0.5*(-1j) #無効
     theta2 = 0 # 0.1*np.pi
-    boundary = "periodic"
+    boundary = "open" #"periodic"
 
     npr_kappa = np.linspace(0, 10, 200)
     #npr_kappa = np.linspace(0, 2, 200)
