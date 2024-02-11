@@ -1,5 +1,4 @@
-
-
+#%%
 if True:
     import numpy as np
     import pandas as pd
@@ -56,6 +55,32 @@ class CoupledModeEquation:
         self.dict_results["psiPhase"] = np.angle(self.psi) / np.pi - 1
         self.dict_results["psiPhaseRel"] = ((np.angle(self.psi) - np.angle(self.psi[0])) / np.pi - 1) % 2 - 1
 
+    def solve_stuartlandau(self, beta=1e-3):
+        iH = 1j*self.H
+        for i in range(self.Nt-1):
+            k1 = -iH @ self.psi[:, i] - beta * np.abs(self.psi[:, i])**2 * self.psi[:, i]
+            psi_k1 = self.psi[:, i] + self.dt/2*k1
+            k2 = -iH @ psi_k1 - beta * np.abs(psi_k1)**2 * psi_k1
+            psi_k2 = self.psi[:, i] + self.dt/2*k2
+            k3 = -iH @ psi_k2 - beta * np.abs(psi_k2)**2 * psi_k2
+            psi_k3 = self.psi[:, i] + self.dt*k3
+            k4 = -iH @ psi_k3 - beta * np.abs(psi_k3)**2 * psi_k3
+
+            self.psi[:, i+1] = self.psi[:, i] + self.dt/6*(k1 + 2*k2 + 2*k3 + k4)
+        self.t += self.tmax
+
+        self.dict_results["psiReal"] = self.psi.real
+        self.dict_results["psiImag"] = self.psi.imag
+        self.dict_results["psiAbs"] = np.abs(self.psi)
+        self.dict_results["psiAbsRel"] = np.abs(self.psi) / np.abs(self.psi[0])
+
+        # 0 to 2
+        self.dict_results["psiPhase"] = np.angle(self.psi) / np.pi - 1
+        self.dict_results["psiPhaseRel"] = ((np.angle(self.psi) - np.angle(self.psi[0])) / np.pi - 1) % 2 - 1
+
+    def get_average(self, key="psiReal", num_data=30):
+        # get average of the last num_data
+        return np.mean(self.dict_results[key][:, -num_data:], axis=1)
 
     def plot(self, key="psiReal", color="gray", list_ylim=[]):
         fig = plt.figure(figsize=(4, 3))
@@ -100,11 +125,16 @@ if __name__ == "__main__":
          )
     
     #psi0 = np.array([1, 1, 1], dtype=np.complex)
-    psi0 = np.array([1, 0, 0], dtype=np.complex)
+    psi0 = np.array([1, 0, 0], dtype=np.complex128)
     #psi0*=30
-    cme = CoupledModeEquation(H)
+    cme = CoupledModeEquation(H, dt=0.01, tmax=100)
     cme.set_initial_state(psi0)
     cme.solve()
-    cme.plot("psiAbs")
+    #cme.plot("psiAbs")
+    cme.plot("psiAbsRel")
+    cme.plot("psiPhaseRel")
+    
+    average = cme.get_average(key="psiPhaseRel", num_data=30)
 
+    print(average)
     print("finished")

@@ -23,15 +23,15 @@ if True:
 
 if __name__ == "__main__":
     omega=0
-    #npr_Delta = np.array([-2,2,-1,0,1])*1
-    npr_Delta = np.array([-2,-1,0,1,2])
+    #npr_Delta = np.array([-2,2,-1,0,1])
+    #npr_Delta = np.array([-2,-1,0,1,2])
     #npr_Delta = np.array([-5,-1,0,1,5])
     #npr_Delta = np.array([-1,-1,-2,-1,0,1,2,1,1])
     #npr_Delta = np.zeros(5)
     #npr_Delta = np.zeros(10)
     
     #np.random.seed(seed=12345678)
-    #npr_Delta = np.random.randn(15)*0.1
+    npr_Delta = np.random.randn(15)*0.1
     n = npr_Delta.shape[0]
 
     #npr_eta = np.array([0, 0., 0., 0., 0])*0.5
@@ -44,6 +44,10 @@ if __name__ == "__main__":
 
     cls_rr = rrarray.RRarray(n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary=boundary)
     H = cls_rr.get_Hamiltonian()
+
+    # gain bias
+    Hgain = 1.j*np.ones(n)
+    H = H + np.diag(Hgain)
 
     # for debug
     eigval, eigvec = cls_rr.solve()
@@ -59,15 +63,21 @@ if __name__ == "__main__":
     #psi0 = np.array([1, 0, 0, 0, 0], dtype=complex)
     #psi0 = np.zeros(n, dtype=complex)
     #psi0[0] = 1
+    
+    # debug
+    #np.linalg.eig(H)[0].imag
+    
     np.random.seed(seed=12345678+1)
     psir = np.random.randn(n)
     np.random.seed(seed=12345678+2)
     psii = np.random.randn(n)
     psi0 = psir + 1j*psii
-    cme = time_evolution.CoupledModeEquation(H, dt=0.01, tmax=20)
-    
+    cme = time_evolution.CoupledModeEquation(H, dt=0.01, tmax=30)
+        
     cme.set_initial_state(psi0)
-    cme.solve()
+    #cme.solve()
+    cme.solve_stuartlandau(beta=1)
+
     cme.plot("psiAbs")
     cme.plot("psiAbsRel")#, list_ylim=[0, 2])
     #cme.plot("psiPhase")
