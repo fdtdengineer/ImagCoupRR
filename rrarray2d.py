@@ -36,8 +36,8 @@ npr_gdiag = np.diagflat(npr_elem_gdiag)
 
 H = 1.j*npr_g -1.j*npr_gdiag
 
-Hgain = 1.j*np.ones(n1*n2)*0.2
-H = H + np.diag(Hgain)
+#Hgain = 1.j*np.ones(n1*n2)*0.2
+#H = H + np.diag(Hgain)
 
 ### eigenvalues and eigenvectors ###
 eigenvalues, eigenvectors = np.linalg.eig(H)
@@ -53,7 +53,7 @@ psi0 = np.ones(n1*n2)
 
 cme = time_evolution.CoupledModeEquation(H, dt=0.01, tmax=100)
 cme.set_initial_state(psi0)
-cme.solve_stuartlandau(beta=1e0)
+cme.solve_stuartlandau(beta=1e-3)
 
 cme.plot("psiAbs")
 cme.plot("psiAbsRel")
