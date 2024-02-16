@@ -127,13 +127,13 @@ if __name__ == "__main__":
     #psi0 = np.array([1, 1, 1], dtype=np.complex)
     psi0 = np.array([1, 0, 0], dtype=np.complex128)
     #psi0*=30
-    cme = CoupledModeEquation(H, dt=0.01, tmax=100)
+    cme = CoupledModeEquation(H, dt=0.01, tmax=10)
     cme.set_initial_state(psi0)
     cme.solve()
     #cme.plot("psiAbs")
     cme.plot("psiAbsRel")
     cme.plot("psiPhaseRel")
-    
+    cme.plot("psiPhase")    
     average = cme.get_average(key="psiPhaseRel", num_data=30)
 
     print(average)
