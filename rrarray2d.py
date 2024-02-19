@@ -129,7 +129,7 @@ print("loss:", loss)
 
 
 #%%
-
+"""
 temp = np.array([[ 0.00000000e+00,  2.42874215e-03, -4.88440346e-04],
        [-4.92423227e-01, -4.87526797e-01, -4.89333382e-01],
        [-2.33219423e-02, -2.04629243e-02,  9.80212932e-01]])
@@ -147,3 +147,4 @@ vtensor = np.round(vtensor, 2).real
 loss = H * vtensor
 loss = np.sum(loss)
 print("loss:", loss)
+"""
