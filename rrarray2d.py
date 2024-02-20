@@ -5,7 +5,7 @@ import numpy as np
 # rand
 np.random.seed(0)
 
-gain=0 #10
+gain=10 #10
 n1 = 3 # サイズ横
 n2 = 3 # サイズ縦
 npr_elem_gh = np.random.randn(n2,n1-1) # 横結合
@@ -160,8 +160,12 @@ plt.figure(figsize=(4,4))
 plt.quiver(X-U/2, Y-V/2, U, V, angles='xy', scale_units='xy', scale=1)
 plt.xlim(-0.5, n1-0.5)
 plt.ylim(n2-0.5, -0.5)
-plt.xlabel('location x')
-plt.ylabel('location y')
+#plt.xlabel('location x')
+#plt.ylabel('location y')
+plt.tick_params(labelbottom=False, labelleft=False, labelright=False, labeltop=False)
+plt.tick_params(bottom=False, left=False, right=False, top=False)
+#plt.box(False)
+plt.tight_layout()
 
 plt.show()
 
@@ -180,8 +184,13 @@ plt.figure(figsize=(4,4))
 plt.quiver(X-U/2, Y-V/2, U, V, angles='xy', scale_units='xy', scale=1)
 plt.xlim(-0.5, n1-0.5)
 plt.ylim(n2-0.5, -0.5)
-plt.xlabel('location x')
-plt.ylabel('location y')
+#plt.xlabel('location x')
+#plt.ylabel('location y')
+plt.tick_params(labelbottom=False, labelleft=False, labelright=False, labeltop=False)
+plt.tick_params(bottom=False, left=False, right=False, top=False)
+#plt.box(False)
+plt.tight_layout()
+
 
 plt.show()
 
