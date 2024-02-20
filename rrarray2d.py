@@ -5,7 +5,7 @@ import numpy as np
 # rand
 np.random.seed(0)
 
-gain=10 #10
+gain=0 #10
 n1 = 3 # サイズ横
 n2 = 3 # サイズ縦
 npr_elem_gh = np.random.randn(n2,n1-1) # 横結合
