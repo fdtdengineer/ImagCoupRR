@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-g = 0j #1.05j
+g = 5j
 
 eps=0.05
 H = 1.j* np.array([
@@ -37,7 +37,7 @@ a0 = np.random.rand(H.shape[0]) + 1.j*np.random.rand(H.shape[0])
 
 cme = time_evolution.CoupledModeEquation(H, dt=0.01, tmax=500)
 cme.set_initial_state(a0)
-cme.solve_stuartlandau(beta=1e-3*0)
+cme.solve_stuartlandau(beta=1e-3)
 
 cme.plot("psiAbs")
 cme.plot("psiAbsRel")

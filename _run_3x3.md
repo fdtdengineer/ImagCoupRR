@@ -48,3 +48,13 @@ $$
 
 $a_k(t)=r_k(t)e^{i\phi_k(t)}$
 
+### 2 次元
+
+
+$$
+\begin{align*}
+  \frac{\mathrm{d}a_m(t)}{\mathrm{d}t} &= 
+  \left( g - g_s {|a_m(t)|}^2 \right) a_m(t) - \sum_{n\in \mathrm{NN}} \kappa_{mn} (a_m(t) + a_n(t))
+\end{align*}  
+$$
+
