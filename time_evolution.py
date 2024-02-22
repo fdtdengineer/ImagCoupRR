@@ -2,6 +2,7 @@
 if True:
     import numpy as np
     import pandas as pd
+    from scipy.fftpack import fft
     import matplotlib.pyplot as plt
     from matplotlib import cm
     from matplotlib import rc
@@ -110,6 +111,25 @@ class CoupledModeEquation:
         plt.show()
         plt.close()
 
+    def save_csv(self, key="psiReal", filename="cme.csv"):
+        df = pd.DataFrame(
+            self.dict_results[key].T, 
+            columns=[key+f"{i+1}" for i in range(self.N)],
+            index=self.tlist
+            )
+        df.index.name = "t"
+        df.to_csv(filepath_output + filename)
+    
+
+    # prototype
+    def get_fft(self, key="psiReal", idx=0, num_data=1000):
+        Trange = self.dt * num_data
+        freq = np.fft.fftfreq(num_data, d=self.dt)
+        npr_y = self.dict_results[key]
+        npr_y = npr_y[idx, -num_data:]
+        npr_y_fft = fft(npr_y)/(num_data/2)
+        np_out = np.array([freq, np.abs(npr_y_fft)])
+        return np_out
 
 
 if __name__ == "__main__":

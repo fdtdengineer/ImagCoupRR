@@ -5,7 +5,7 @@ import numpy as np
 # rand
 np.random.seed(0)
 
-gain=0 #10
+gain=2 #10
 n1 = 3 # サイズ横
 n2 = 3 # サイズ縦
 npr_elem_gh = np.random.randn(n2,n1-1) # 横結合
@@ -44,7 +44,8 @@ H = H + np.diag(Hgain)
 ### eigenvalues and eigenvectors ###
 eigenvalues, eigenvectors = np.linalg.eig(H)
 #print(np.round(eigenvalues.imag, 3))
-print(eigenvalues.imag[np.argsort(eigenvalues.imag)][::-1][:2])
+#print(eigenvalues.imag[np.argsort(eigenvalues.imag)][::-1][:2])
+print(np.round(eigenvalues.imag[np.argsort(eigenvalues.imag)][::-1],2))
 
 
 
