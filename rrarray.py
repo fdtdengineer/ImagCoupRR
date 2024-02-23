@@ -18,7 +18,7 @@ if True:
 
 
 class RRarray:
-    def __init__(self, n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=False, boundary="open"):
+    def __init__(self, n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=False, boundary="open", flg_flux=False):
         """
         n: number of Ring Resonators
         omega: detuning of the ring resonators 
@@ -43,6 +43,7 @@ class RRarray:
         self.savefig = savefig
         #self.n = n
         self.filepath_output = "fig\\"
+        self.flg_flux = flg_flux
         if n<=2:
             Exception("The number of ring resonators must be greater than 2.")
         elif len(npr_Delta) != n:
@@ -104,9 +105,11 @@ class RRarray:
         self.H += H_od1 + H_od2 + Hnnn_od1 + Hnnn_od2
 
 
-
-        self.H_inv = np.linalg.pinv(self.H)
-
+        if self.flg_flux:
+            self.H_inv = np.linalg.pinv(self.H)
+        else:
+            # Dummy identity matrix
+            self.H_inv = np.eye(self.n)
         return self.H
 
     def get_Hamiltonian(self):

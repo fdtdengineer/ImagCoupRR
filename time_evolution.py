@@ -16,7 +16,11 @@ if True:
     from mpl_toolkits.mplot3d import Axes3D
 
     filepath_output = "fig\\"
-
+    # linear fit
+    def linfit(x, y):
+        A = np.vstack([x, np.ones(len(x))]).T
+        m, c = np.linalg.lstsq(A, y, rcond=None)[0]
+        return m, c
 
 class CoupledModeEquation:
     # class for the coupled mode equation by Runge-Kutta method
@@ -122,14 +126,42 @@ class CoupledModeEquation:
     
 
     # prototype
-    def get_fft(self, key="psiReal", idx=0, num_data=1000):
-        Trange = self.dt * num_data
-        freq = np.fft.fftfreq(num_data, d=self.dt)
-        npr_y = self.dict_results[key]
-        npr_y = npr_y[idx, -num_data:]
-        npr_y_fft = fft(npr_y)/(num_data/2)
-        np_out = np.array([freq, np.abs(npr_y_fft)])
-        return np_out
+    def get_fft(self, num_data=1000):
+        key_re="psiReal"
+        key_im="psiAbs"
+
+        dict_fft = {}
+        freq = 2*np.pi*np.fft.fftfreq(num_data, self.dt)
+        freq = freq[:int(num_data/2)]
+            
+        npr_peak = np.zeros(self.N)
+        npr_decay = np.zeros(self.N)
+        for idx in range(self.N):
+            npr_y = self.dict_results[key_re]
+            npr_y = npr_y[idx, -num_data:]
+            npr_y_fft = fft(npr_y)/(num_data/2)
+            npr_y_fft_positive = np.abs(npr_y_fft)[:int(num_data/2)]
+            dict_fft[f"{key_re}_{idx}"] = npr_y_fft_positive
+
+            # peak frequency
+            idx_peak = np.argmax(np.abs(npr_y_fft))
+            peak = freq[idx_peak]
+            npr_peak[idx] = peak
+
+            # exp decay rate 
+            npr_r = self.dict_results[key_im]
+            npr_r = npr_r[idx, -num_data:]
+            npr_t = self.tlist[-num_data:]
+            # linear fit
+            m, c = linfit(npr_t, np.log(npr_r) )
+            npr_decay[idx] = m
+             
+            
+
+        df_fft = pd.DataFrame(dict_fft, index=freq)
+        return {"df": df_fft, "peak": npr_peak}
+
+
 
 
 if __name__ == "__main__":
@@ -158,3 +190,5 @@ if __name__ == "__main__":
 
     print(average)
     print("finished")
+
+# %%
