@@ -152,8 +152,8 @@ class RRarray:
 
         eigval_list_real = self.eigval_list.real.astype(float)
         df_eigval_r = pd.DataFrame(eigval_list_real)
-        if np.ndim(npr_list) < 2:
-            df_eigval_r.index = self.npr_list[0]
+        #if np.ndim(npr_list) < 2:
+        df_eigval_r.index = self.npr_list[0]
         df_eigval_r.index.name = list_keys[0]
         df_eigval_r.columns = ["$\omega_{%d}$"%i for i in range(n_state)]
         self.df_eigval_r = df_eigval_r

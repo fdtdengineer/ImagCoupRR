@@ -154,12 +154,10 @@ class CoupledModeEquation:
             npr_r = self.dict_results[key_im]
             npr_r = npr_r[idx, -num_data:]
             npr_t = self.tlist[-num_data:]
-            # linear fit
             m, c = linfit(npr_t, np.log(npr_r) )
             npr_decay[idx] = m
              
             
-
         df_fft = pd.DataFrame(dict_fft, index=freq)
         return {"df": df_fft, "peak": npr_peak, "decay": npr_decay}
 

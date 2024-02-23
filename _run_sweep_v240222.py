@@ -84,7 +84,7 @@ if __name__ == "__main__":
     #print("end")
 
     #%%
-    idx_sol=1
+    idx_sol=0
     E = peak[idx_sol] + 1.j*decay[idx_sol] # real part of frequency
     phi = ave_rAbs*np.exp(1.j*ave_phi*np.pi)
     phi = phi * np.exp(-1.j*np.angle(phi[0]))
