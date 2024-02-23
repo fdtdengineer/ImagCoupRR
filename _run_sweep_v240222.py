@@ -21,6 +21,8 @@ if True:
 
 if __name__ == "__main__":
     gain = 5#398
+    gs = 1e-3
+
     delta = 0.0
     #npr_Delta = np.array([-2,2,-1,0,1])
     #npr_Delta = np.array([-2,-1,0,1,2])
@@ -32,19 +34,19 @@ if __name__ == "__main__":
     n = npr_Delta.shape[0]
     #npr_eta = -np.array([0., 0., 0., 0., 0.])*0.5
     npr_eta = np.ones(n)*gain
-    kappa = 5 #
+    kappa = 1 #
     theta = np.pi#0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
 
-    #npr_kappa = np.linspace(0, 2, 201)
-    npr_kappa = np.linspace(0, 5, 101)
+    npr_kappa = np.linspace(0, 2, 201)
+    #npr_kappa = np.linspace(0, 5, 101)
     
     npr_sweep = np.array([npr_kappa]) # kappa と kappa2 を同時に変化させる
 
-    #cls_rr = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
-    #cls_rr.sweep(npr_sweep, list_keys=["kappa"])
-    #cls_rr.plot_eigval_sweep()
+    cls_rr = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
+    cls_rr.sweep(npr_sweep, list_keys=["kappa"])
+    cls_rr.plot_eigval_sweep()
 
     import time_evolution
     #seed
@@ -56,22 +58,24 @@ if __name__ == "__main__":
     cls_rr2 = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
     cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=200)
     cme.set_initial_state(a0)
-    cme.solve_stuartlandau(beta=1e-3)
+    cme.solve_stuartlandau(beta=gs)
     #cme.plot("psiReal")
-    #cme.plot("psiAbsRel")
+    cme.plot("psiAbsRel")
     #cme.plot("psiPhaseRel")
     #cme.plot("psiPhase")    
 
     ave_r = cme.get_average(key="psiReal", num_data=1)
+    ave_rAbs = cme.get_average(key="psiAbs", num_data=1)
     ave_rRel = cme.get_average(key="psiAbsRel", num_data=1)
     ave_phi = cme.get_average(key="psiPhaseRel", num_data=1)
 
     #save
     cme.save_csv(filename="cme.csv")
     
-    dict_fft = cme.get_fft(key="psiReal", num_data=10000)
+    dict_fft = cme.get_fft(num_data=10000)
     df_fft = dict_fft["df"]
     peak = dict_fft["peak"]
+    decay = dict_fft["decay"]
 
     plt.plot(df_fft)
     plt.xlim(0, 5)
@@ -80,14 +84,15 @@ if __name__ == "__main__":
     #print("end")
 
     #%%
-    E = peak[0] # real part of frequency
-    phi = ave_rRel*np.exp(1.j*ave_phi*np.pi)
-    phi = phi / np.linalg.norm(phi)
+    idx_sol=1
+    E = peak[idx_sol] + 1.j*decay[idx_sol] # real part of frequency
+    phi = ave_rAbs*np.exp(1.j*ave_phi*np.pi)
     phi = phi * np.exp(-1.j*np.angle(phi[0]))
-
+    phi0 = phi / np.linalg.norm(phi)
     v1 = E * phi
-    v2 = cls_rr2.H @ phi
+    v2 = cls_rr2.H @ phi - 1.j*gs * np.abs(phi)**2 * phi
 
+    print("Time-simulated solution")
     print(v1)
     print(v2)
     print("\n")
@@ -98,11 +103,14 @@ if __name__ == "__main__":
     #print("eigval, eigvec")
     eval = eigval[idx_minloss]
     evec = eigvec[:, idx_minloss]
+    print("Analytical solution (linear)")
     print(eval * evec)
     print(cls_rr2.H @ evec)
     print("\n")
 
-    print(eval * phi)
+    print(eval * phi0)
+
+    amp_theo = np.sqrt(np.abs(eval.imag) / gs)
 
     #print(eigval[idx_minloss])
     #print(eigvec[:, idx_minloss])

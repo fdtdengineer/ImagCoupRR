@@ -18,7 +18,7 @@ if True:
 
 
 class RRarray:
-    def __init__(self, n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=False, boundary="open", flg_flux=False):
+    def __init__(self, n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=False, boundary="open", flg_flux=True):
         """
         n: number of Ring Resonators
         omega: detuning of the ring resonators 

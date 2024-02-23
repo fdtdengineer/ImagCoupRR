@@ -76,6 +76,8 @@ class CoupledModeEquation:
 
         self.dict_results["psiReal"] = self.psi.real
         self.dict_results["psiImag"] = self.psi.imag
+        self.dict_results["psiRealRel"] = self.psi.real / np.abs(self.psi[0])
+
         self.dict_results["psiAbs"] = np.abs(self.psi)
         self.dict_results["psiAbsRel"] = np.abs(self.psi) / np.abs(self.psi[0])
 
@@ -127,7 +129,7 @@ class CoupledModeEquation:
 
     # prototype
     def get_fft(self, num_data=1000):
-        key_re="psiReal"
+        key_re="psiRealRel"
         key_im="psiAbs"
 
         dict_fft = {}
@@ -159,7 +161,7 @@ class CoupledModeEquation:
             
 
         df_fft = pd.DataFrame(dict_fft, index=freq)
-        return {"df": df_fft, "peak": npr_peak}
+        return {"df": df_fft, "peak": npr_peak, "decay": npr_decay}
 
 
 
