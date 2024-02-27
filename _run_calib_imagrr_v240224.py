@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     npr_kappa = np.linspace(0, 2, 201)    
     npr_sweep = np.array([npr_kappa]) # kappa と kappa2 を同時に変化させる
-
+    
     cls_rr = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
     cls_rr.sweep(npr_sweep, list_keys=["kappa"])
     cls_rr.plot_eigval_sweep()

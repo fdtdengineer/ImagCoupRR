@@ -17,100 +17,26 @@ if True:
     filepath_output = "output\\"
 
 
-class RRarray:
-    def __init__(self, n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=False, boundary="open", flg_flux=True):
-        """
-        n: number of Ring Resonators
-        omega: detuning of the ring resonators 
-        npr_delta (vector): refractive index change of the ring
-        npr_eta (vector): extinction coefficient change of the ring
-        kappa: coupling coefficient
-        theta: phase shift between the two ring resonators
-        kappa2: coupling coefficient (next nearest neighbor)
-        theta2: phase shift between the two ring resonators (next nearest neighbor)
-        """
-        self.dict_vals = {
-            "n":n, 
-            "omega":omega, 
-            "npr_delta":npr_Delta, 
-            "npr_eta":npr_eta, 
-            "kappa":kappa, 
-            "theta":theta,
-            "kappa2":kappa2, 
-            "theta2":theta2,
-            "boundary":boundary,
-            }
+class RRbase:
+    def __init__(self, dict_vals, savefig=False, boundary="open", flg_flux=True):
+        self.dict_vals = dict_vals
         self.savefig = savefig
-        #self.n = n
+        self.n = dict_vals["n"]
         self.filepath_output = "fig\\"
         self.flg_flux = flg_flux
-        if n<=2:
+        if self.n<=2:
             Exception("The number of ring resonators must be greater than 2.")
-        elif len(npr_Delta) != n:
+        elif len(npr_Delta) != self.n:
             Exception("The length of npr_delta must be equal to n.")
-        elif len(npr_eta) != n:
+        elif len(npr_eta) != self.n:
             Exception("The length of npr_eta must be equal to n.")
         else:
             pass
 
         self._build_hamiltonian()
 
-    def _build_hamiltonian(self, dict_keys={}):
-        for key, val in dict_keys.items():
-            self.dict_vals[key] = val
-            #self.dict_vals["kappa2"] = self.dict_vals["kappa"]
-        
-        self.n = self.dict_vals["n"]
-        self.omega = self.dict_vals["omega"]
-        self.npr_delta = self.dict_vals["npr_delta"]
-        self.npr_eta = self.dict_vals["npr_eta"]
-        self.kappa = self.dict_vals["kappa"]
-        self.theta = self.dict_vals["theta"]
-        self.kappa2 = self.dict_vals["kappa2"]
-        self.theta2 = self.dict_vals["theta2"]
-        self.boundary = self.dict_vals["boundary"]
-
-        self.H = np.zeros((self.n, self.n))
-        self.H = self.H.astype(complex)
-
-        arg = np.exp(1j * self.theta)
-
-        # diagonal elements
-        if self.boundary=="open":
-            self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * self.npr_eta[0] - 2j * self.kappa
-            self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * self.npr_eta[self.n-1] - 2j * self.kappa
-        elif self.boundary=="periodic":
-            self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * self.npr_eta[0] - 4j * self.kappa
-            self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * self.npr_eta[self.n-1] - 4j * self.kappa
-            self.H[0, self.n-1] = (-2j) * self.kappa * arg
-            self.H[self.n-1, 0] = (-2j) * self.kappa * arg
-        for i in range(1, self.n-1):
-            self.H[i, i] = -self.omega + self.npr_delta[i] + 1j * self.npr_eta[i] - 4j * self.kappa 
-
-        # off-diagonal elements
-        H_od1 = np.diag(np.ones(self.n-1),1)
-        H_od2 = np.diag(np.ones(self.n-1),1).T
-
-        H_od1 = H_od1 * (-2j) * self.kappa * arg
-        H_od2 = H_od2 * (-2j) * self.kappa * arg
-
-        # next nearest neighbor
-        Hnnn_od1 = np.diag(np.ones(self.n-2),2)
-        Hnnn_od2 = np.diag(np.ones(self.n-2),2).T
-
-        arg_nnn = np.exp(1j * self.theta2)
-        Hnnn_od1 = Hnnn_od1 * (-2j) * self.kappa2 * arg_nnn
-        Hnnn_od2 = Hnnn_od2 * (-2j) * self.kappa2 * arg_nnn
-
-        self.H += H_od1 + H_od2 + Hnnn_od1 + Hnnn_od2
-
-
-        if self.flg_flux:
-            self.H_inv = np.linalg.pinv(self.H)
-        else:
-            # Dummy identity matrix
-            self.H_inv = np.eye(self.n)
-        return self.H
+    def _build_hamiltonian(self):
+        Exception("This method must be overridden.")
 
     def get_Hamiltonian(self):
         return self.H
@@ -152,8 +78,10 @@ class RRarray:
 
         eigval_list_real = self.eigval_list.real.astype(float)
         df_eigval_r = pd.DataFrame(eigval_list_real)
-        #if np.ndim(npr_list) < 2:
-        df_eigval_r.index = self.npr_list[0]
+        if np.ndim(npr_list) == 2:
+            df_eigval_r.index = self.npr_list[0]
+        else:
+            df_eigval_r.index = npr_list[0,:,0]
         df_eigval_r.index.name = list_keys[0]
         df_eigval_r.columns = ["$\omega_{%d}$"%i for i in range(n_state)]
         self.df_eigval_r = df_eigval_r
@@ -165,7 +93,7 @@ class RRarray:
             show_label=True, 
             grid=False, 
             list_ylim=[-6, 1],
-            list_figsize=[6,3],
+            list_figsize=[7,3],
             idx_key=0, 
             npr_x=np.array([])
             ):
@@ -229,8 +157,9 @@ class RRarray:
 
         if idx==-1:
             idx = self.n - 1
+        sqr_eta = np.sqrt(2*np.abs(self.npr_eta[0]))
         npr_input = np.zeros(self.n, dtype=complex)
-        npr_input[0] = 1.j*np.sqrt(2*self.npr_eta[0])*s1
+        npr_input[0] = 1.j*sqr_eta*s1
  
         self.npr_R = np.zeros(self.npr_freq.shape[0], dtype=complex)
         self.npr_T = np.zeros(self.npr_freq.shape[0], dtype=complex)
@@ -240,8 +169,10 @@ class RRarray:
             npr_amp = np.dot(self.H_inv, npr_input)
             a1 = npr_amp[0]
             an = npr_amp[idx]
-            self.npr_R[i] = np.abs(-1 + np.sqrt(2*self.npr_eta[0]) * a1 / s1)**2
-            self.npr_T[i] = 2*self.npr_eta[-1] * np.abs(an / s1)**2
+            #self.npr_R[i] = np.abs(-1 + sqr_eta * a1 / s1)**2
+            self.npr_R[i] = np.abs(-1 - sqr_eta * a1 / s1)**2
+            
+            self.npr_T[i] = 2*np.abs(self.npr_eta[-1]) * np.abs(an / s1)**2
 
         # real float
         self.npr_R = self.npr_R.real.astype(float)
@@ -250,7 +181,7 @@ class RRarray:
         self.df_flux = pd.DataFrame({"freq":self.npr_freq.real, "R":self.npr_R, "T":self.npr_T})
         self.df_flux.to_csv(self.filepath_output + "flux.csv", index=False)
 
-    def plot_flux(self, plottype="T"):
+    def plot_flux(self, plottype="T", ylim=[]):
         """
         plot the amplitude of the output port for each input frequency
         """
@@ -260,12 +191,15 @@ class RRarray:
             ax.plot(self.npr_freq, self.npr_T, label="T", color="teal")
         elif plottype=="R":
             ax.plot(self.npr_freq, self.npr_R, label="R", color="gray")
-
+        elif plottype=="both":
+            ax.plot(self.npr_freq, self.npr_T, label="T", color="teal")
+            ax.plot(self.npr_freq, self.npr_R, label="R", color="gray")
 
         ax.set_xlabel(r"$\omega$")
         ax.set_ylabel(plottype)
         ax.legend(fontsize=fs*0.6)
-        #ax.set_ylim(0, 1)
+        if len(ylim)==2:
+            ax.set_ylim(ylim)
         plt.tight_layout()
         if self.savefig:
             plt.savefig(self.filepath_output + "flux.svg", transparent=True)
@@ -307,6 +241,141 @@ class RRarray:
         #ax.set_ylim(0, 1)
         plt.tight_layout()
         plt.show()
+
+
+class RRarray(RRbase):
+    def __init__(self, n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=False, boundary="open", flg_flux=True):
+
+        """
+        n: number of Ring Resonators
+        omega: detuning of the ring resonators 
+        npr_delta (vector): refractive index change of the ring
+        npr_eta (vector): extinction coefficient change of the ring
+        kappa: coupling coefficient
+        theta: phase shift between the two ring resonators
+        kappa2: coupling coefficient (next nearest neighbor)
+        theta2: phase shift between the two ring resonators (next nearest neighbor)
+        """
+        dict_vals = {
+            "n":n, 
+            "omega":omega, 
+            "npr_delta":npr_Delta, 
+            "npr_eta":npr_eta, 
+            "kappa":kappa, 
+            "theta":theta,
+            "kappa2":kappa2, 
+            "theta2":theta2,
+            "boundary":boundary,
+            }
+
+        super().__init__(dict_vals, savefig, boundary, flg_flux)
+
+    def _build_hamiltonian(self, dict_keys={}):
+        for key, val in dict_keys.items():
+            self.dict_vals[key] = val
+            #self.dict_vals["kappa2"] = self.dict_vals["kappa"]
+        
+        self.n = self.dict_vals["n"]
+        self.omega = self.dict_vals["omega"]
+        self.npr_delta = self.dict_vals["npr_delta"]
+        self.npr_eta = self.dict_vals["npr_eta"]
+        self.kappa = self.dict_vals["kappa"]
+        self.theta = self.dict_vals["theta"]
+        self.kappa2 = self.dict_vals["kappa2"]
+        self.theta2 = self.dict_vals["theta2"]
+        self.boundary = self.dict_vals["boundary"]
+
+        self.H = np.zeros((self.n, self.n))
+        self.H = self.H.astype(complex)
+
+        arg = np.exp(1j * self.theta)
+
+        # diagonal elements
+        if self.boundary=="open":
+            self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * self.npr_eta[0] - 2j * self.kappa
+            self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * self.npr_eta[self.n-1] - 2j * self.kappa
+        elif self.boundary=="periodic":
+            self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * self.npr_eta[0] - 4j * self.kappa
+            self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * self.npr_eta[self.n-1] - 4j * self.kappa
+            self.H[0, self.n-1] = (-2j) * self.kappa * arg
+            self.H[self.n-1, 0] = (-2j) * self.kappa * arg
+        for i in range(1, self.n-1):
+            self.H[i, i] = -self.omega + self.npr_delta[i] + 1j * self.npr_eta[i] - 4j * self.kappa 
+
+        # off-diagonal elements
+        H_od1 = np.diag(np.ones(self.n-1),1)
+        H_od2 = np.diag(np.ones(self.n-1),1).T
+
+        H_od1 = H_od1 * (-2j) * self.kappa * arg
+        H_od2 = H_od2 * (-2j) * self.kappa * arg
+
+        # next nearest neighbor
+        Hnnn_od1 = np.diag(np.ones(self.n-2),2)
+        Hnnn_od2 = np.diag(np.ones(self.n-2),2).T
+
+        arg_nnn = np.exp(1j * self.theta2)
+        Hnnn_od1 = Hnnn_od1 * (-2j) * self.kappa2 * arg_nnn
+        Hnnn_od2 = Hnnn_od2 * (-2j) * self.kappa2 * arg_nnn
+
+        self.H += H_od1 + H_od2 + Hnnn_od1 + Hnnn_od2
+
+        if self.flg_flux:
+            self.H_inv = np.linalg.pinv(self.H)
+        else:
+            # Dummy identity matrix
+            self.H_inv = np.eye(self.n)
+        return self.H
+
+
+class RR2w2wg(RRbase):
+    """
+    See "230824 Non-Hermitian waveguide-coupled Resonators.pptx" p.2
+    Only n=2 is supported.
+    """
+    def __init__(self, n, omega, npr_Delta, npr_eta, npr_kappa, npr_theta, npr_t, savefig=False, boundary="open", flg_flux=True):
+        dict_vals = {
+            "n":n, 
+            "omega":omega, 
+            "npr_delta":npr_Delta,
+            "npr_eta":npr_eta, 
+            "npr_kappa":npr_kappa, 
+            "npr_theta":npr_theta,
+            "npr_t":npr_t,
+            "boundary":boundary,
+            }
+        if n!=2:
+            Exception("The number of ring resonators must be 2 (not supported).")
+        super().__init__(dict_vals, savefig, boundary, flg_flux)
+
+    def _build_hamiltonian(self, dict_keys={}):
+        for key, val in dict_keys.items():
+            self.dict_vals[key] = val
+        
+        self.n = self.dict_vals["n"]
+        self.omega = self.dict_vals["omega"]
+        self.npr_delta = self.dict_vals["npr_delta"]
+        self.npr_eta = self.dict_vals["npr_eta"]
+        self.npr_kappa = self.dict_vals["npr_kappa"]
+        self.npr_theta = self.dict_vals["npr_theta"]
+        self.npr_t = self.dict_vals["npr_t"]
+
+        self.H = np.zeros((self.n, self.n))
+        self.H = self.H.astype(complex)
+        npr_arg = np.exp(1j * self.npr_theta)
+        sqrt_eta = np.sqrt(np.abs(self.npr_kappa[0]*self.npr_kappa[self.n-1]))
+
+        self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * (self.npr_eta[0] - self.npr_kappa[0])
+        self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * (self.npr_eta[self.n-1] - self.npr_kappa[self.n-1])
+        self.H[0, self.n-1] = 2j * sqrt_eta * self.npr_t[0]*npr_arg[0]
+        self.H[self.n-1, 0] = 2j * sqrt_eta * self.npr_t[1]*npr_arg[1]
+
+        if self.flg_flux:
+            self.H_inv = np.linalg.pinv(self.H)
+        else:
+            # Dummy identity matrix
+            self.H_inv = np.eye(self.n)
+        return self.H
+
 
 
 

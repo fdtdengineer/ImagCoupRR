@@ -127,7 +127,6 @@ class CoupledModeEquation:
         df.to_csv(filepath_output + filename)
     
 
-    # prototype
     def get_fft(self, num_data=1000):
         key_re="psiRealRel"
         key_im="psiAbs"

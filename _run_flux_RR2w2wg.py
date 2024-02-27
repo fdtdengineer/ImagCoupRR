@@ -26,29 +26,34 @@ if __name__ == "__main__":
     n = npr_Delta.shape[0]
     #npr_eta = -np.array([1, 0, 0, 0, 1])
     npr_eta = -np.array([1, 1])*0.1
-    kappa = 0.8#5 #3.819095477386935 #3.5#0.35#10*(1j) # dummy because of the sweep
-    theta = 0 # 0.1*np.pi
-    kappa2 = 0#kappa #*(-3) #0.5*(-1j) #無効
-    theta2 = 0 # 0.1*np.pi
+    npr_kappa = np.array([1,1])*1#0.5
+    npr_theta = np.array([1,1])*np.pi*0
+    npr_t = np.array([1,1])*1
 
     # sweep kappa
-    npr_kappa = np.linspace(0, 1, 101)
-    npr_sweep = np.array([npr_kappa])
-    cls_rr_sweep = rrarray.RRarray(n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True)
-    cls_rr_sweep.sweep(npr_sweep)
-    cls_rr_sweep.plot_eigval_sweep(list_ylim=[-4, 1])
-    # flux
+    arr_kappa = np.linspace(0, 1, 101)
+    arr_sweep = np.outer(arr_kappa, npr_kappa) # np.array([arr_kappa])
+    arr_sweep = arr_sweep.reshape(1,-1, 2)
+    cls_rr2wg_sweep = rrarray.RR2w2wg(
+        n, omega, npr_Delta, npr_eta, npr_kappa, npr_theta, npr_t, savefig=True
+        )
+    cls_rr2wg_sweep.sweep(arr_sweep, ["npr_kappa"])
+    cls_rr2wg_sweep.plot_eigval_sweep() #list_ylim=[-4, 1])
     
+    # flux
+    npr_kappa = np.array([1,1])*0.5
     npr_omega = np.linspace(-2,2,201)
-    cls_rr = rrarray.RRarray(n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True)
-    cls_rr.solve_flux(npr_omega)
-    cls_rr.plot_flux()
+    cls_rr2wg = rrarray.RR2w2wg(
+        n, omega, npr_Delta, npr_eta, npr_kappa, npr_theta, npr_t, savefig=True
+        )
+    cls_rr2wg.solve_flux(npr_omega)
+    cls_rr2wg.plot_flux()
 
     xmax = 2 #0.5
     xmin = -xmax
     p0 = [1, 0, 1, 3]
-    cls_rr.plot_flux(plottype="both",ylim=[0,1])
-    cls_rr.fit_by_lorentzian(plottype="T",xmin=xmin,xmax=xmax,p0=p0)
+    cls_rr2wg.plot_flux(plottype="both",ylim=[0,1])
+    cls_rr2wg.fit_by_lorentzian(plottype="T",xmin=xmin,xmax=xmax,p0=p0)
 
     
     print("end")
