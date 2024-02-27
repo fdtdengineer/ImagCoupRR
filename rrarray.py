@@ -26,9 +26,9 @@ class RRbase:
         self.flg_flux = flg_flux
         if self.n<=2:
             Exception("The number of ring resonators must be greater than 2.")
-        elif len(npr_Delta) != self.n:
+        elif len(dict_vals["npr_delta"]) != self.n:
             Exception("The length of npr_delta must be equal to n.")
-        elif len(npr_eta) != self.n:
+        elif len(dict_vals["npr_eta"]) != self.n:
             Exception("The length of npr_eta must be equal to n.")
         else:
             pass

@@ -20,7 +20,7 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = 5#398
+    gain = 5
     gs = 1e-3
 
     delta = 0.0
@@ -28,8 +28,8 @@ if __name__ == "__main__":
     
     n = npr_Delta.shape[0]
     npr_eta = np.ones(n)*gain
-    kappa = 0.5 #
-    theta = np.pi#0.2*np.pi #
+    kappa = 1#0.5 #
+    theta = np.pi #0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
 
@@ -39,9 +39,9 @@ if __name__ == "__main__":
     cls_rr = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
     cls_rr.sweep(npr_sweep, list_keys=["kappa"])
     cls_rr.plot_eigval_sweep()
-
+    
     import time_evolution
-    #seed
+    #seed   
     np.random.seed(12345678)
 
     # initial state
@@ -51,6 +51,9 @@ if __name__ == "__main__":
     cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=200)
     cme.set_initial_state(a0)
     cme.solve_stuartlandau(beta=gs)
+    
+    cme.plot("psiReal")
+    cme.plot("psiAbs")
     cme.plot("psiAbsRel")
 
     ave_r = cme.get_average(key="psiReal", num_data=1)
@@ -58,7 +61,7 @@ if __name__ == "__main__":
     ave_rRel = cme.get_average(key="psiAbsRel", num_data=1)
     ave_phi = cme.get_average(key="psiPhaseRel", num_data=1)
     
-    dict_fft = cme.get_fft(num_data=10000)
+    dict_fft = cme.get_fft(num_data=1000)
     df_fft = dict_fft["df"]
     peak = dict_fft["peak"]
     decay = dict_fft["decay"]
