@@ -26,7 +26,7 @@ if __name__ == "__main__":
     n = npr_Delta.shape[0]
     #npr_eta = -np.array([1, 0, 0, 0, 1])
     npr_eta = -np.array([1, 1])*0.1
-    npr_kappa = -np.array([1,1])*1#0.5
+    npr_kappa = np.array([1,1])*1#0.5
     npr_theta = np.array([1,1])*np.pi*0
     npr_t = np.array([1,1])*1
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     cls_rr2wg_sweep.plot_eigval_sweep() #list_ylim=[-4, 1])
     
     # flux
-    npr_kappa = -np.array([1,1])*0.5
+    npr_kappa = np.array([1,1])*0.5
     npr_omega = np.linspace(-2,2,201)
     cls_rr2wg = rrarray.RR2w2wg(
         n, omega, npr_Delta, npr_eta, npr_kappa, npr_theta, npr_t, savefig=True

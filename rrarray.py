@@ -364,8 +364,8 @@ class RR2w2wg(RRbase):
         npr_arg = np.exp(1j * self.npr_theta)
         sqrt_eta = np.sqrt(np.abs(self.npr_kappa[0]*self.npr_kappa[self.n-1]))
 
-        self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * (self.npr_eta[0] + self.npr_kappa[0])
-        self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * (self.npr_eta[self.n-1] + self.npr_kappa[self.n-1])
+        self.H[0, 0] = -self.omega + self.npr_delta[0] + 1j * (self.npr_eta[0] - self.npr_kappa[0])
+        self.H[self.n-1, self.n-1] = -self.omega + self.npr_delta[self.n-1] + 1j * (self.npr_eta[self.n-1] - self.npr_kappa[self.n-1])
         self.H[0, self.n-1] = 2j * sqrt_eta * self.npr_t[0]*npr_arg[0]
         self.H[self.n-1, 0] = 2j * sqrt_eta * self.npr_t[1]*npr_arg[1]
 

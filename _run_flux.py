@@ -26,7 +26,7 @@ if __name__ == "__main__":
     n = npr_Delta.shape[0]
     #npr_eta = -np.array([1, 0, 0, 0, 1])
     npr_eta = -np.array([1, 1])*0.1
-    kappa = 0.5#5 #3.819095477386935 #3.5#0.35#10*(1j) # dummy because of the sweep
+    kappa = 0.8#5 #3.819095477386935 #3.5#0.35#10*(1j) # dummy because of the sweep
     theta = 0 # 0.1*np.pi
     kappa2 = 0#kappa #*(-3) #0.5*(-1j) #無効
     theta2 = 0 # 0.1*np.pi
