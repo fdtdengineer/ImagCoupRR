@@ -21,7 +21,7 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = -0.#398
+    gain = 2#398
     gs = 1e-3
 
     delta = 0.0
@@ -34,7 +34,9 @@ if __name__ == "__main__":
     kappa2 = 0 #
     theta2 = 0 #
 
-    npr_kappa = np.linspace(0, 2, 21)
+    #npr_kappa = np.linspace(0, 2, 21)
+    npr_kappa = np.linspace(0, 0.2, 21)
+    
     #npr_sweep = np.array([npr_kappa]) # kappa と kappa2 を同時に変化させる
 
     def loss(H, arg, beta=gs):
@@ -43,9 +45,9 @@ if __name__ == "__main__":
         x_1 = arg[2] + 1.j * arg[3]
         x_2 = arg[4] + 1.j * arg[5]
         x = np.array([x_0, x_1, x_2])
-        x /= np.linalg.norm(x)
+        #x /= np.linalg.norm(x)
 
-        v = omega* x - H @ x #+ 1.j*(beta * np.conj(x) @ x) * x
+        v = omega* x - H @ x + 1.j* (beta * np.abs(x)**2) * x
         loss = np.conj(v).T @ v
         return loss.real
         
@@ -64,17 +66,18 @@ if __name__ == "__main__":
             amp_theo = np.sqrt(np.abs(eig.imag+gain) / gs)
             vec = eigvec[:,j]
             vec /= vec[0]
-            arg = np.array([vec[1].real, vec[1].imag, vec[2].real, vec[2].imag])
-            x0 = np.array([eig.real, eig.imag]+ arg.tolist()).flatten()
-            #x0 = np.array([eig] + [amp_theo, amp_theo, 0, amp_theo,0])
+            arg = amp_theo * np.array([vec[0].real, vec[1].real, vec[1].imag, vec[2].real, vec[2].imag])
+            x0 = np.array([eig.real]+ arg.tolist()).flatten()
 
-            bounds = [(0, None)] + [(None, None)]*5
+            #bounds = [(0, None)] + [(None, None)]*5
+            bounds = [(0, 5)] + [(-amp_theo/2, amp_theo/2)]*5
+
             res = minimize(loss_opt, x0, tol=1e-20, options={"maxiter": 1000}, bounds=bounds)
             npr_eig[i,j] = res.x[0]
             npr_fun[i,j] = res.fun
             npr_eig_org[i,j] = eig.real
 
-
+    print(npr_fun)
     # plot
     fig = plt.figure()
     ax = fig.add_subplot(111)
