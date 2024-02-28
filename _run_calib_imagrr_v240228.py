@@ -21,7 +21,7 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = 10#398
+    gain = -0.#398
     gs = 1e-3
 
     delta = 0.0
@@ -39,18 +39,14 @@ if __name__ == "__main__":
 
     def loss(H, arg, beta=gs):
         omega = arg[0] #+ 1.j * arg[1]
-        x_0 = arg[1] #+ 1.j * arg[2]
+        x_0 = arg[1]
         x_1 = arg[2] + 1.j * arg[3]
         x_2 = arg[4] + 1.j * arg[5]
         x = np.array([x_0, x_1, x_2])
-        #norm = np.linalg.norm(x)
-        #x /= max(np.linalg.norm(x),1e-8)
+        x /= np.linalg.norm(x)
 
-        #v = omega* x - H @ x + 1.j* (beta * np.conj(x) @ x) * x
-        v = omega* x - H @ x + 1.j* (beta * np.abs(x)**2) * x
-        
+        v = omega* x - H @ x #+ 1.j*(beta * np.conj(x) @ x) * x
         loss = np.conj(v).T @ v
-        #loss += 1e-5*np.linalg.norm(np.abs(x) - amp_theo)**2
         return loss.real
         
     npr_eig = np.zeros((npr_kappa.shape[0], n), dtype=float)
@@ -68,8 +64,8 @@ if __name__ == "__main__":
             amp_theo = np.sqrt(np.abs(eig.imag+gain) / gs)
             vec = eigvec[:,j]
             vec /= vec[0]
-            arg = amp_theo * np.array([vec[0].real, vec[1].real, vec[1].imag, vec[2].real, vec[2].imag])
-            x0 = np.array([eig.real]+ arg.tolist()).flatten()
+            arg = np.array([vec[1].real, vec[1].imag, vec[2].real, vec[2].imag])
+            x0 = np.array([eig.real, eig.imag]+ arg.tolist()).flatten()
             #x0 = np.array([eig] + [amp_theo, amp_theo, 0, amp_theo,0])
 
             bounds = [(0, None)] + [(None, None)]*5
@@ -78,7 +74,6 @@ if __name__ == "__main__":
             npr_fun[i,j] = res.fun
             npr_eig_org[i,j] = eig.real
 
-    print(npr_fun)
 
     # plot
     fig = plt.figure()

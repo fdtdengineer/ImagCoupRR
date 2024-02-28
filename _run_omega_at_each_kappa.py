@@ -19,7 +19,7 @@ if True:
 
 
 if __name__ == "__main__":
-    #gain = 5
+    gain = 5
     gs = 1e-3
 
     delta = 0.0
@@ -51,6 +51,8 @@ if __name__ == "__main__":
             cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=200)
             cme.set_initial_state(a0)
             cme.solve_stuartlandau(beta=gs)
+            #cme.solve_3rdwnorm(beta=gs)
+            
 
             ave_r = cme.get_average(key="psiReal", num_data=1)
             ave_rAbs = cme.get_average(key="psiAbs", num_data=1)

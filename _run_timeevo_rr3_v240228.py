@@ -20,48 +20,56 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = 0
+    gain = 2#2.5#1.2#0.#398
     gs = 1e-3
 
     delta = 0.0
     npr_Delta = np.array([1,2,4])#+10
     
+    
+    #npr_Delta = np.zeros(5)
     n = npr_Delta.shape[0]
+    #npr_eta = -np.array([0., 0., 0., 0., 0.])*0.5
     npr_eta = np.ones(n)*gain
-    kappa = 1#0.5 #
-    theta = np.pi #0.2*np.pi #
+    kappa = 1.5
+    theta = np.pi#0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
 
-    npr_kappa = np.linspace(0, 2, 201)    
-    npr_sweep = np.array([npr_kappa]) # kappa と kappa2 を同時に変化させる
+    npr_kappa = np.linspace(0, 2, 201)
+    #npr_kappa = np.linspace(0, 5, 101)
     
+    npr_sweep = np.array([npr_kappa]) # kappa と kappa2 を同時に変化させる
+
     cls_rr = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
     cls_rr.sweep(npr_sweep, list_keys=["kappa"])
     cls_rr.plot_eigval_sweep()
-    
+
     import time_evolution
-    #seed   
+    #seed
     np.random.seed(12345678)
 
     # initial state
     a0 = np.random.rand(n) + 1.j*np.random.rand(n)
 
     cls_rr2 = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
-    cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=200)
+    cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=500)
     cme.set_initial_state(a0)
     cme.solve_stuartlandau(beta=gs)
-    
-    cme.plot("psiReal")
     cme.plot("psiAbs")
     cme.plot("psiAbsRel")
+    #cme.plot("psiPhaseRel")
+    #cme.plot("psiPhase")    
 
     ave_r = cme.get_average(key="psiReal", num_data=1)
     ave_rAbs = cme.get_average(key="psiAbs", num_data=1)
     ave_rRel = cme.get_average(key="psiAbsRel", num_data=1)
     ave_phi = cme.get_average(key="psiPhaseRel", num_data=1)
+
+    #save
+    cme.save_csv(filename="cme.csv")
     
-    dict_fft = cme.get_fft(num_data=1000)
+    dict_fft = cme.get_fft(num_data=25000)
     df_fft = dict_fft["df"]
     peak = dict_fft["peak"]
     decay = dict_fft["decay"]
@@ -72,7 +80,7 @@ if __name__ == "__main__":
     print(peak)
     #print("end")
 
-    # Time-simulated solution
+    #%%
     idx_sol=0
     E = peak[idx_sol] + 1.j*decay[idx_sol] # real part of frequency
     phi = ave_rAbs*np.exp(1.j*ave_phi*np.pi)
@@ -81,81 +89,54 @@ if __name__ == "__main__":
     v1 = E * phi
     v2 = cls_rr2.H @ phi - 1.j*gs * np.abs(phi)**2 * phi
 
+
     print("Time-simulated solution")
     print(v1)
     print(v2)
+    print("Error ratio: " + str(np.round(np.linalg.norm(v1-v2)/np.linalg.norm(v2), 5)))
+    print("\n")
+    print("Frequency: " + str(E))
     print("\n")
 
-    # Analytical solution (linear)
+    # 解析解（線形）
     eigval, eigvec = np.linalg.eig(cls_rr2.H)
     idx_minloss = eigval.imag.argmax()
     #print("eigval, eigvec")
     eval = eigval[idx_minloss]
     evec = eigvec[:, idx_minloss]
+    #evec /= evec[0]
     print("Analytical solution (linear)")
     print(eval * evec)
     print(cls_rr2.H @ evec)
     print("\n")
+
     print(eval * phi0)
+    print("\n")
+    print("Error between Tie and Analytical: ")
+    print(phi0 / evec)
     amp_theo = np.sqrt(np.abs(eval.imag) / gs)
-    #print(eigval[idx_minloss])
-    #print(eigvec[:, idx_minloss])
+    #%%
+    # phi0 は各サイトの振幅が揃う傾向にあるらしい
+    v_t = (3 * np.conj(phi0) * phi0).real
+    v_a = (3 * np.conj(evec) * evec).real
+    sigma_t = np.std(np.log(v_t))
+    sigma_a = np.std(np.log(v_a))
+    print(sigma_t, sigma_a)
+
 
     #%%
-
-    #########################################
-    ###### Calibration ######################
-    #########################################
-    from scipy.optimize import minimize
-
-    def loss(H, arg, beta=1e-3):
-        omega = arg[0] #+ 1.j * arg[1]
-        x_0 = arg[1] #+ 1.j * arg[2]
-        x_1 = arg[2] + 1.j * arg[3]
-        x_2 = arg[4] + 1.j * arg[5]
-        x = np.array([x_0, x_1, x_2])
-        #x /= np.linalg.norm(x)
-
-        v = omega* x - H @ x + 1.j* beta * np.conj(x) @ x * x
-        loss = np.conj(v).T @ v
-        #loss += np.linalg.norm(np.abs(x) - amp_theo)**2
-        return loss.real
+    a = np.array([1, 1, 1])
+    E = 1
+    amp_theo = 100#np.sqrt(np.abs(eval.imag) / gs)
+    cls_rr_3 = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
+    H = cls_rr_3.H
+    v = H@a - E*a
+    loss = (np.conj(v).T @ v).real + np.linalg.norm(np.abs(a) - amp_theo)**2
     
-    def loss_opt(arg):
-        return loss(cls_rr2.H, arg)
 
-    x0 = np.array([3] + [amp_theo, amp_theo, 0, amp_theo,0])
-    #x0 = np.array([
-    #        peak[idx_sol], phi[0].real, phi[1].real, phi[1].imag, phi[2].real, phi[2].imag
-    #    ])
-    bounds = [(0, None)] + [(None, None)]*5
-    res = minimize(loss_opt, x0, tol=1e-20, options={"maxiter": 1000}, bounds=bounds)
-    print(res)
-    
-    """
-    def gauss_newton(f, x0, eps=1e-4, tol=1e-20, maxiter=1000):
-        x = x0
-        nx = x.shape[0]
-        nf = f(x).shape[0]
-        for i in range(maxiter):
-            J = np.zeros((nf, nx))
-            for j in range(n):
-                xh = x.copy()
-                xl = x.copy()
-                xh[j] += eps
-                xl[j] -= eps
-                J[:, j] = (f(xh) - f(xl)) / (2 * eps)
-            dx = np.linalg.pinv(J) @ f(x)
-            x -= dx
-            if np.linalg.norm(dx) < tol:
-                break
-        return x
 
-    x = gauss_newton(loss_opt, x0)
-    print(x)
-    # check
-    print(loss_opt(x))
-    """
-    
+
+
+
 
 # %%
