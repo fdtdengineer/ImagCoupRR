@@ -36,7 +36,7 @@ class CoupledModeEquation:
         self.psi = np.zeros((self.N, self.Nt), dtype=complex)
 
         self.dict_results = {}
-        self.dict_labels = {"psiReal": "$r_i$", "psiImag": "$phi_i$", "psiAbs": "$r_i$", "psiAbsRel": "$r_i / r_0$", "psiPhase": "$\phi$", "psiPhaseRel": "$\phi_i - \phi_0$"}
+        self.dict_labels = {"psiReal": "$Re(a_i)$", "psiRealRel": "$Re(a_i)/r_i$", "psiImag": "$Im(a_i)$", "psiAbs": "$r_i$", "psiAbsRel": "$r_i / r_0$", "psiPhase": "$\phi$", "psiPhaseRel": "$\phi_i - \phi_0$"}
 
     def set_initial_state(self, psi0):
         self.psi[:, 0] = psi0
@@ -115,7 +115,7 @@ class CoupledModeEquation:
         # get average of the last num_data
         return np.mean(self.dict_results[key][:, -num_data:], axis=1)
 
-    def plot(self, key="psiReal", color="gray", list_ylim=[]):
+    def plot(self, key="psiReal", color="gray", list_ylim=[], yscale="linear"):
         fig = plt.figure(figsize=(4, 3))
         ax = fig.add_subplot(111)
         
@@ -139,6 +139,8 @@ class CoupledModeEquation:
 
         #ax.legend()
         plt.tight_layout()
+        if yscale == "log":
+            ax.set_yscale("log")
         plt.savefig(filepath_output + "cme_" + key + ".svg", transparent=True)
         plt.show()
         plt.close()

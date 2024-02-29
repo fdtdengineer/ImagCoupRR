@@ -7,7 +7,7 @@ if True:
     from matplotlib import cm
     from matplotlib import rc
     rc('text', usetex=False)
-    fs = 18
+    fs = 16
     plt.rcParams['font.family']= 'sans-serif'
     plt.rcParams['font.sans-serif'] = ['Arial']
     plt.rcParams["font.size"] = fs # 全体のフォントサイズが変更されます。
@@ -20,7 +20,7 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = 2#2.5#1.2#0.#398
+    gain = 0. #2.5#1.2#0.#398
     gs = 1e-3
 
     delta = 0.0
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     n = npr_Delta.shape[0]
     #npr_eta = -np.array([0., 0., 0., 0., 0.])*0.5
     npr_eta = np.ones(n)*gain
-    kappa = 1.5
+    kappa = 0.5#1.5
     theta = np.pi#0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
@@ -54,10 +54,12 @@ if __name__ == "__main__":
 
     cls_rr2 = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
     cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=500)
+    
     cme.set_initial_state(a0)
     cme.solve_stuartlandau(beta=gs)
-    cme.plot("psiAbs")
+    cme.plot("psiAbs",yscale="log")
     cme.plot("psiAbsRel")
+    cme.plot("psiRealRel")
     #cme.plot("psiPhaseRel")
     #cme.plot("psiPhase")    
 
@@ -74,8 +76,13 @@ if __name__ == "__main__":
     peak = dict_fft["peak"]
     decay = dict_fft["decay"]
 
+    plt.figure(figsize=(4, 3))
     plt.plot(df_fft)
     plt.xlim(0, 5)
+    plt.xlabel("Frequency")
+    plt.ylabel("Amplitude")
+    plt.tight_layout()
+    
 
     print(peak)
     #print("end")

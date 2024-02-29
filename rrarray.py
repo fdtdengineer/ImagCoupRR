@@ -87,6 +87,20 @@ class RRbase:
         self.df_eigval_r = df_eigval_r
         self.df_eigval_r.to_csv(self.filepath_output + "eigval_real.csv")
 
+        # temp
+        eigval_list_imag = self.eigval_list.imag.astype(float)
+        df_eigval_i = pd.DataFrame(eigval_list_imag)
+        if np.ndim(npr_list) == 2:
+            df_eigval_i.index = self.npr_list[0]
+        else:
+            df_eigval_i.index = npr_list[0,:,0]
+        df_eigval_i.index.name = list_keys[0]
+        df_eigval_i.columns = ["$\omega_{%d}$"%i for i in range(n_state)]
+        self.df_eigval_i = df_eigval_i
+        self.df_eigval_i.to_csv(self.filepath_output + "eigval_imag.csv")
+
+
+
     def plot_eigval_sweep(
             self, 
             xlabel="$\kappa'$", 

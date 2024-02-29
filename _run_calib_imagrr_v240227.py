@@ -21,7 +21,7 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = 10#398
+    gain = 0.2#398
     gs = 1e-3
 
     delta = 0.0
@@ -39,24 +39,22 @@ if __name__ == "__main__":
 
     def loss(H, arg, beta=gs):
         omega = arg[0] #+ 1.j * arg[1]
-        x_0 = arg[1] #+ 1.j * arg[2]
-        x_1 = arg[2] + 1.j * arg[3]
-        x_2 = arg[4] + 1.j * arg[5]
+        x_0 = arg[2] #+ 1.j * arg[2]
+        x_1 = arg[3] + 1.j * arg[4]
+        x_2 = arg[5] + 1.j * arg[6]
         x = np.array([x_0, x_1, x_2])
-        #norm = np.linalg.norm(x)
-        #x /= max(np.linalg.norm(x),1e-8)
-
+        norm = np.linalg.norm(x)
+        x /= max(norm,1e-10)
         #v = omega* x - H @ x + 1.j* (beta * np.conj(x) @ x) * x
-        v = omega* x - H @ x + 1.j* (beta * np.abs(x)**2) * x
-        
+        v = omega* x - H @ x + arg[1]*1.j* (beta * np.abs(x)**2) * x        
         loss = np.conj(v).T @ v
-        #loss += 1e-5*np.linalg.norm(np.abs(x) - amp_theo)**2
         return loss.real
         
     npr_eig = np.zeros((npr_kappa.shape[0], n), dtype=float)
     npr_eig_org = np.zeros((npr_kappa.shape[0], n), dtype=float)
     npr_fun = np.zeros((npr_kappa.shape[0], n), dtype=float)
-    
+    npr_amp = np.zeros((npr_kappa.shape[0], n), dtype=float)
+
     for i, kappa in enumerate(npr_kappa):  
         cls_rr = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
         def loss_opt(arg):
@@ -67,14 +65,15 @@ if __name__ == "__main__":
         for j, eig in enumerate(eigval):
             amp_theo = np.sqrt(np.abs(eig.imag+gain) / gs)
             vec = eigvec[:,j]
-            vec /= vec[0]
-            arg = amp_theo * np.array([vec[0].real, vec[1].real, vec[1].imag, vec[2].real, vec[2].imag])
-            x0 = np.array([eig.real]+ arg.tolist()).flatten()
+            vec *= np.exp(-1.j*np.angle(vec[0]))
+            arg = np.array([vec[0].real, vec[1].real, vec[1].imag, vec[2].real, vec[2].imag])
+            x0 = np.array([eig.real, amp_theo**2]+ arg.tolist()).flatten()
             #x0 = np.array([eig] + [amp_theo, amp_theo, 0, amp_theo,0])
 
-            bounds = [(0, None)] + [(None, None)]*5
+            bounds = [(0, None)] + [(None, None)] + [(None, None)]*5
             res = minimize(loss_opt, x0, tol=1e-20, options={"maxiter": 1000}, bounds=bounds)
             npr_eig[i,j] = res.x[0]
+            npr_amp[i,j] = res.x[1]
             npr_fun[i,j] = res.fun
             npr_eig_org[i,j] = eig.real
 
