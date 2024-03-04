@@ -3,6 +3,7 @@ if True:
     import numpy as np
     import pandas as pd
     from scipy.fftpack import fft
+    from scipy.signal import find_peaks
     import matplotlib.pyplot as plt
     from matplotlib import cm
     from matplotlib import rc
@@ -155,14 +156,25 @@ class CoupledModeEquation:
         df.to_csv(filepath_output + filename)
     
 
-    def get_fft(self, num_data=1000):
+    def get_fft(self, num_data=1000, type_peak="max"):
         key_re="psiRealRel"
         key_im="psiAbs"
 
         dict_fft = {}
         freq = 2*np.pi*np.fft.fftfreq(num_data, self.dt)
         freq = freq[:int(num_data/2)]
-            
+
+        def get_peak(npr_abs_y_fft, freq):
+            if type_peak == "max":
+                idx_peak = np.argmax(npr_abs_y_fft)
+                peak = freq[idx_peak]
+                return peak
+            elif type_peak == "all":
+                peaks, _ = find_peaks(npr_abs_y_fft)
+                return freq[peaks]
+            else:
+                Exception("type_peak should be max or all")
+
         npr_peak = np.zeros(self.N)
         npr_decay = np.zeros(self.N)
         for idx in range(self.N):
@@ -173,9 +185,7 @@ class CoupledModeEquation:
             dict_fft[f"{key_re}_{idx}"] = npr_y_fft_positive
 
             # peak frequency
-            idx_peak = np.argmax(np.abs(npr_y_fft))
-            peak = freq[idx_peak]
-            npr_peak[idx] = peak
+            npr_peak[idx] = get_peak(npr_y_fft_positive, freq)
 
             # exp decay rate 
             npr_r = self.dict_results[key_im]

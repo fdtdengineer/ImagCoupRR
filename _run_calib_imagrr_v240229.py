@@ -21,7 +21,7 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = 20 #398
+    gain = 2.5 #398
     gs = 1e-3
 
     delta = 0.0
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
         for j, eig in enumerate(eigval):
             if eig.imag < 0:
-                npr_eig[i,j] = eig.real
+                npr_eig[i,j] = np.nan#eig.real
                 npr_eig_org[i,j] = eig.real
                 npr_fun[i,j] = np.inf
                 continue
@@ -78,9 +78,15 @@ if __name__ == "__main__":
 
             bounds = [(0, None)] + [(None, None)] + [(None, None)]*5
             res = minimize(loss_opt, x0, tol=1e-20, options={"maxiter": 1000}, bounds=bounds)
-            npr_eig[i,j] = res.x[0]
-            npr_amp[i,j] = res.x[1]
+
             npr_fun[i,j] = res.fun
+            if res.fun < 1e-10:
+                npr_eig[i,j] = res.x[0]
+                npr_amp[i,j] = res.x[1]
+            else:
+                npr_eig[i,j] = np.nan
+                npr_amp[i,j] = np.nan
+
             npr_eig_org[i,j] = eig.real
 
     print(npr_fun)

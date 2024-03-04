@@ -20,7 +20,7 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = 0. #2.5#1.2#0.#398
+    gain = 1 #2.5#1.2#0.#398
     gs = 1e-3
 
     delta = 0.0
