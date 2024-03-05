@@ -111,7 +111,6 @@ class CoupledModeEquation:
         self.dict_results["psiPhase"] = np.angle(self.psi) / np.pi - 1
         self.dict_results["psiPhaseRel"] = ((np.angle(self.psi) - np.angle(self.psi[0])) / np.pi - 1) % 2 - 1
 
-
     def get_average(self, key="psiReal", num_data=30):
         # get average of the last num_data
         return np.mean(self.dict_results[key][:, -num_data:], axis=1)
@@ -164,19 +163,21 @@ class CoupledModeEquation:
         freq = 2*np.pi*np.fft.fftfreq(num_data, self.dt)
         freq = freq[:int(num_data/2)]
 
-        def get_peak(npr_abs_y_fft, freq):
+        def get_peak(npr_abs_y_fft, freq, height=0.03):
             if type_peak == "max":
                 idx_peak = np.argmax(npr_abs_y_fft)
                 peak = freq[idx_peak]
                 return peak
             elif type_peak == "all":
-                peaks, _ = find_peaks(npr_abs_y_fft)
+                peaks, _ = find_peaks(npr_abs_y_fft, height=height)
                 return freq[peaks]
             else:
                 Exception("type_peak should be max or all")
 
         npr_peak = np.zeros(self.N)
+        list_peak = []
         npr_decay = np.zeros(self.N)
+        
         for idx in range(self.N):
             npr_y = self.dict_results[key_re]
             npr_y = npr_y[idx, -num_data:]
@@ -185,7 +186,12 @@ class CoupledModeEquation:
             dict_fft[f"{key_re}_{idx}"] = npr_y_fft_positive
 
             # peak frequency
-            npr_peak[idx] = get_peak(npr_y_fft_positive, freq)
+            if type_peak == "max":
+                npr_peak[idx] = get_peak(npr_y_fft_positive, freq)
+            elif type_peak == "all":
+                list_peak.append(get_peak(npr_y_fft_positive, freq).tolist())
+            else:
+                Exception("type_peak should be max or all")
 
             # exp decay rate 
             npr_r = self.dict_results[key_im]
@@ -194,7 +200,15 @@ class CoupledModeEquation:
             m, c = linfit(npr_t, np.log(npr_r) )
             npr_decay[idx] = m
              
-            
+        if type_peak == "all":
+            list_peak = [item for sublist in list_peak for item in sublist]
+            list_peak = list(set(list_peak))
+            npr_peak = np.array(list_peak)
+
+            # fill np.nan to be the lenght =3 if len(npr_peak)<3
+            if len(npr_peak) < 3:
+                npr_peak = np.concatenate([npr_peak, np.nan*np.zeros(3-len(npr_peak))])
+
         df_fft = pd.DataFrame(dict_fft, index=freq)
         return {"df": df_fft, "peak": npr_peak, "decay": npr_decay}
 

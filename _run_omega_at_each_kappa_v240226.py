@@ -30,7 +30,7 @@ if __name__ == "__main__":
     theta = np.pi#0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
-    npr_gain = np.linspace(0, 5, 3)
+    npr_gain = np.linspace(0, 2, 3)
     npr_kappa = np.linspace(0, 2, 21)
     
     import time_evolution
@@ -48,18 +48,17 @@ if __name__ == "__main__":
         npr_eta = np.ones(n)*gain
         for j, kappa in enumerate(npr_kappa):
             cls_rr2 = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
-            cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=200)
+            cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=500)
             cme.set_initial_state(a0)
             cme.solve_stuartlandau(beta=gs)
-            #cme.solve_3rdwnorm(beta=gs)
-            
+            #cme.solve_3rdwnorm(beta=gs)          
 
             ave_r = cme.get_average(key="psiReal", num_data=1)
             ave_rAbs = cme.get_average(key="psiAbs", num_data=1)
             ave_rRel = cme.get_average(key="psiAbsRel", num_data=1)
             ave_phi = cme.get_average(key="psiPhaseRel", num_data=1)
         
-            dict_fft = cme.get_fft(num_data=10000)
+            dict_fft = cme.get_fft(num_data=25000)
             df_fft = dict_fft["df"]
             peak = dict_fft["peak"]
             decay = dict_fft["decay"]

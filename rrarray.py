@@ -99,8 +99,6 @@ class RRbase:
         self.df_eigval_i = df_eigval_i
         self.df_eigval_i.to_csv(self.filepath_output + "eigval_imag.csv")
 
-
-
     def plot_eigval_sweep(
             self, 
             xlabel="$\kappa'$", 
