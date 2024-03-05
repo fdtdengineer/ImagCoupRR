@@ -31,7 +31,7 @@ if __name__ == "__main__":
     n = npr_Delta.shape[0]
     #npr_eta = -np.array([0., 0., 0., 0., 0.])*0.5
     npr_eta = np.ones(n)*gain
-    kappa = 0.28 #0.9#1.5
+    kappa = 1.006 # 0.28 #0.9#1.5
     theta = np.pi#0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     a0 = np.random.rand(n) + 1.j*np.random.rand(n)
 
     cls_rr2 = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
-    cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=500)
+    cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=20)
     
     cme.set_initial_state(a0)
     cme.solve_stuartlandau(beta=gs)
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     #save
     cme.save_csv(filename="cme.csv")
     
-    dict_fft = cme.get_fft(num_data=25000, type_peak="all")
+    dict_fft = cme.get_fft(num_data=250, type_peak="all")
     df_fft = dict_fft["df"]
     peak = dict_fft["peak"]
     decay = dict_fft["decay"]
