@@ -205,10 +205,12 @@ class CoupledModeEquation:
             list_peak = list(set(list_peak))
             npr_peak = np.array(list_peak)
 
+            #peak = peak[peak <= 4.01]
+            #peak = peak[peak >= 0.99]
             # fill np.nan to be the lenght =3 if len(npr_peak)<3
             if len(npr_peak) < 3:
                 npr_peak = np.concatenate([npr_peak, np.nan*np.zeros(3-len(npr_peak))])
-
+            
         df_fft = pd.DataFrame(dict_fft, index=freq)
         return {"df": df_fft, "peak": npr_peak, "decay": npr_decay}
 

@@ -16,6 +16,7 @@ if True:
 
     filepath_output = "out\\"
     import rrarray
+    import time_evolution
 
 
 if __name__ == "__main__":
@@ -30,10 +31,9 @@ if __name__ == "__main__":
     theta = np.pi#0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
-    npr_gain = np.linspace(0, 2, 3)
-    npr_kappa = np.linspace(0, 2, 21)
+    npr_gain = np.linspace(0, 2, 2)
+    npr_kappa = np.linspace(0, 2, 5)
     
-    import time_evolution
     #seed
     np.random.seed(12345678)
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
             decay = dict_fft["decay"]
 
             #peak = np.array([peak.tolist() + eigval.real[eigval.imag < 0].tolist()])
-
+            
             arr_Er[j,i] = peak#[idx_sol]
             arr_Ei[j,i] = decay#[idx_sol]
             #E = peak[idx_sol] + 1.j*decay[idx_sol]
@@ -76,13 +76,18 @@ if __name__ == "__main__":
             #v1 = E * phi
             #v2 = cls_rr2.H @ phi - 1.j*gs * np.abs(phi)**2 * phi
 
-    columns = [f"gain_{str(np.round(gain,2))}" for gain in npr_gain]
-    #df_re = pd.DataFrame(arr_Er, index=npr_kappa, columns=columns)
-    #df_im = pd.DataFrame(arr_Ei, index=npr_kappa, columns=columns)
+    columns = [[f"no1_gain_{str(np.round(gain,2))}", f"no2_gain_{str(np.round(gain,2))}", f"no3_gain_{str(np.round(gain,2))}"] for gain in npr_gain]
+    columns = [item for sublist in columns for item in sublist]
+
+    arr_Er_reshaped = arr_Er.reshape(-1, n*npr_gain.shape[0])
+    arr_Ei_reshaped = arr_Ei.reshape(-1, n*npr_gain.shape[0])
+
+    df_re = pd.DataFrame(arr_Er_reshaped, index=npr_kappa, columns=columns)
+    df_im = pd.DataFrame(arr_Ei_reshaped, index=npr_kappa, columns=columns)
 
     #save
-    #df_re.to_csv(filepath_output + "df_re.csv")
-    #df_im.to_csv(filepath_output + "df_im.csv")
+    df_re.to_csv(filepath_output + "df_re.csv")
+    df_im.to_csv(filepath_output + "df_im.csv")
 
     print("done")
 

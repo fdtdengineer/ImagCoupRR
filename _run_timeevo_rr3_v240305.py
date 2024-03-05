@@ -20,7 +20,7 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = 1 #2.5#1.2#0.#398
+    gain = 3 #2.5#1.2#0.#398
     gs = 1e-3
 
     delta = 0.0
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     n = npr_Delta.shape[0]
     #npr_eta = -np.array([0., 0., 0., 0., 0.])*0.5
     npr_eta = np.ones(n)*gain
-    kappa = 0.5#1.5
+    kappa = 0.28 #0.9#1.5
     theta = np.pi#0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
