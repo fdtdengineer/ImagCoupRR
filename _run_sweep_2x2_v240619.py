@@ -24,9 +24,9 @@ if __name__ == "__main__":
     npr_Delta = np.array([1,0])
     #npr_Delta = np.zeros(5)
     n = npr_Delta.shape[0]
-    npr_eta = np.array([1., 1.])
+    npr_eta = np.array([1., 1.])*0.6
     kappa = 1#
-    theta = 0 #np.pi #0.2*np.pi #
+    theta = 0.01*np.pi #np.pi #0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     cls_rr = rrarray.RRarray(n, omega, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True)
     cls_rr.sweep(arr_sweep, list_keys=["kappa"])
 
-    cls_rr.plot_eigval_sweep(npr_x=npr_sweep_kappa, xlabel="$\kappa$")
+    cls_rr.plot_eigval_sweep(npr_x=npr_sweep_kappa, xlabel="$\kappa$",list_ylim=[-1.2,1.2])
     cls_rr.show_eigvec(npr_sweep_kappa.shape[0] - 1)
     
 
