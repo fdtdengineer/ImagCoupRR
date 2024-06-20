@@ -20,23 +20,23 @@ if True:
 
 
 if __name__ == "__main__":
-    gain = 3 #2.5#1.2#0.#398
+    gain = 0.98#1.03#0.98#1.03#0.98#0.99 #0.98 #2.5#1.2#0.#398
     gs = 1e-3
 
     delta = 0.0
-    npr_Delta = np.array([1,2,4])#+10
+    npr_Delta = np.array([0,1])#+10
     
     
     #npr_Delta = np.zeros(5)
     n = npr_Delta.shape[0]
     #npr_eta = -np.array([0., 0., 0., 0., 0.])*0.5
     npr_eta = np.ones(n)*gain
-    kappa = 1.0#0.25#0.9#1.5
-    theta = 0#np.pi#0.2*np.pi #
+    kappa = 0.3#0.9#1.5
+    theta = 0.05*np.pi#0.2*np.pi #
     kappa2 = 0 #
     theta2 = 0 #
 
-    npr_kappa = np.linspace(0, 2, 201)
+    npr_kappa = np.linspace(0, 0.5, 201)
     #npr_kappa = np.linspace(0, 5, 101)
     
     npr_sweep = np.array([npr_kappa]) # kappa と kappa2 を同時に変化させる
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     a0 = np.random.rand(n) + 1.j*np.random.rand(n)
 
     cls_rr2 = rrarray.RRarray(n, delta, npr_Delta, npr_eta, kappa, theta, kappa2, theta2, savefig=True, boundary="open")
-    cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.01, tmax=500)
+    cme = time_evolution.CoupledModeEquation(cls_rr2.H, dt=0.08, tmax=4000)
     
     cme.set_initial_state(a0)
     cme.solve_stuartlandau(beta=gs)
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     plt.figure(figsize=(4, 3))
     plt.plot(df_fft)
-    plt.xlim(0, 5)
+    plt.xlim(0, 1)
     plt.xlabel("Frequency")
     plt.ylabel("Amplitude")
     plt.tight_layout()
