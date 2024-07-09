@@ -24,7 +24,7 @@ if __name__ == "__main__":
     npr_Delta = np.array([1,0])
     #npr_Delta = np.zeros(5)
     n = npr_Delta.shape[0]
-    npr_eta = np.array([1., 1.])*0.7
+    npr_eta = np.array([1., 1.])*0.5
     kappa = 1#
     theta = 0.0*np.pi #np.pi #0.2*np.pi #
     kappa2 = 0 #
